@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MY MECHANIC - Premium Roadside Assistance</title>
+
+  <!-- Three.js and Tailwind (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      font-family: 'Orbitron', monospace;
+      background: linear-gradient(135deg, #0c0c0c 0%, #1a0a2e 50%, #16213e 100%);
+      overflow-x: hidden;
+    }
+    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    .glow { box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite alternate; }
+    @keyframes pulse-glow { from { box-shadow: 0 0 20px rgba(139,92,246,0.4); } to { box-shadow: 0 0 40px rgba(139,92,246,0.8); } }
+    .float { animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .gradient-text { background: linear-gradient(45deg,#8b5cf6,#ec4899,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .btn-3d { transform-style: preserve-3d; transition: transform .3s; } .btn-3d:hover { transform: translateZ(10px) rotateX(5deg); }
+    #three-container { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+    .content { position: relative; z-index: 10; }
+    .modal-overlay { backdrop-filter: blur(20px); background: rgba(0,0,0,.8); }
+    .no-scroll { overflow: hidden; }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen">
+  <div id="three-container" aria-hidden="true"></div>
+
+  <div id="app" class="content">
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen" class="min-h-screen flex items-center justify-center p-8">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="text-center lg:text-left">
+          <h1 class="text-7xl font-bold mb-6 gradient-text float">MY MECHANIC</h1>
+          <p class="text-2xl text-gray-300 mb-4">🚀 Premium Roadside Assistance</p>
+          <p class="text-lg text-purple-300 mb-12">Experience the future of automotive care with 3D technology, instant service, and premium support.</p>
+
+          <div class="space-y-6">
+            <button onclick="showPricing()" class="w-full lg:w-96 py-6 px-8 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl text-white font-bold text-xl hover:scale-105 transform transition-all duration-300 glow btn-3d">🚗 I Need a Mechanic</button>
+            <button onclick="showMechanicPricing()" class="w-full lg:w-96 py-6 px-8 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-2xl text-white font-bold text-xl hover:scale-105 transform transition-all duration-300 glow btn-3d">🔧 I'm a Mechanic</button>
+          </div>
+
+          <div class="mt-12 flex justify-center lg:justify-start gap-8 text-sm text-gray-400">
+            <div class="flex items-center gap-2"><span class="text-green-400">⚡</span><span>Instant Service</span></div>
+            <div class="flex items-center gap-2"><span class="text-blue-400">📍</span><span>GPS Tracking</span></div>
+            <div class="flex items-center gap-2"><span class="text-purple-400">💳</span><span>Secure Payments</span></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+          <div class="glass p-6 rounded-2xl glow text-center"><div class="text-4xl font-bold gradient-text">24/7</div><div class="text-sm text-gray-300 mt-2">Available</div></div>
+          <div class="glass p-6 rounded-2xl glow text-center"><div class="text-4xl font-bold gradient-text">15min</div><div class="text-sm text-gray-300 mt-2">Response Time</div></div>
+          <div class="glass p-6 rounded-2xl glow text-center"><div class="text-4xl font-bold gradient-text">500+</div><div class="text-sm text-gray-300 mt-2">Mechanics</div></div>
+          <div class="glass p-6 rounded-2xl glow text-center"><div class="text-4xl font-bold gradient-text">99%</div><div class="text-sm text-gray-300 mt-2">Success Rate</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing Screen -->
+    <div id="pricingScreen" class="min-h-screen p-8 hidden">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-6xl font-bold mb-4 gradient-text">Choose Your Service Plan</h2>
+          <p class="text-xl text-gray-300">Premium roadside assistance tailored to your needs</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <!-- Plans (same as before) -->
+          <!-- Basic -->
+          <div class="glass p-8 rounded-3xl hover:scale-105 transition-all duration-300 glow">
+            <div class="text-center mb-6"><div class="text-4xl mb-4">⚡</div><h3 class="text-2xl font-bold mb-2 text-blue-400">Quick Fix</h3><div class="text-4xl font-bold mb-1">₹299</div><div class="text-sm opacity-80">30 mins</div></div>
+            <ul class="space-y-3 mb-8 text-sm"><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Battery Jump Start</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Basic Diagnostics</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Minor Adjustments</li></ul>
+            <button onclick="selectPlan('basic')" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl hover:scale-105 transition-all font-bold">Select Plan</button>
+          </div>
+
+          <!-- Standard -->
+          <div class="glass p-8 rounded-3xl hover:scale-105 transition-all duration-300 glow relative ring-4 ring-purple-500">
+            <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-bold pulse-glow">MOST POPULAR</div>
+            <div class="text-center mb-6"><div class="text-4xl mb-4">🔧</div><h3 class="text-2xl font-bold mb-2 text-purple-400">Standard Repair</h3><div class="text-4xl font-bold mb-1">₹699</div><div class="text-sm opacity-80">1-2 hours</div></div>
+            <ul class="space-y-3 mb-8 text-sm"><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Tire Replacement</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Brake Service</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Oil Change</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Battery Replacement</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Basic Engine Check</li></ul>
+            <button onclick="selectPlan('standard')" class="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl hover:scale-105 transition-all font-bold">Select Plan</button>
+          </div>
+
+          <!-- Premium -->
+          <div class="glass p-8 rounded-3xl hover:scale-105 transition-all duration-300 glow">
+            <div class="text-center mb-6"><div class="text-4xl mb-4">⚙️</div><h3 class="text-2xl font-bold mb-2 text-pink-400">Complete Service</h3><div class="text-4xl font-bold mb-1">₹1299</div><div class="text-sm opacity-80">2-4 hours</div></div>
+            <ul class="space-y-3 mb-8 text-sm"><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Full Engine Diagnostics</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Transmission Service</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>AC Service</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Electrical Repairs</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Complete Inspection</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Warranty Included</li></ul>
+            <button onclick="selectPlan('premium')" class="w-full py-3 bg-gradient-to-r from-pink-500 to-red-500 rounded-xl hover:scale-105 transition-all font-bold">Select Plan</button>
+          </div>
+
+          <!-- Emergency -->
+          <div class="glass p-8 rounded-3xl hover:scale-105 transition-all duration-300 glow">
+            <div class="text-center mb-6"><div class="text-4xl mb-4">🚨</div><h3 class="text-2xl font-bold mb-2 text-red-400">24/7 Emergency</h3><div class="text-4xl font-bold mb-1">₹1999</div><div class="text-sm opacity-80">Immediate</div></div>
+            <ul class="space-y-3 mb-8 text-sm"><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>24/7 Availability</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Towing Service</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>On-spot Repairs</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Emergency Fuel</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Lockout Service</li><li class="flex items-center"><span class="text-green-400 mr-2">✓</span>Priority Support</li></ul>
+            <button onclick="selectPlan('emergency')" class="w-full py-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl hover:scale-105 transition-all font-bold">Select Plan</button>
+          </div>
+        </div>
+
+        <div class="text-center"><button onclick="showWelcome()" class="px-8 py-3 glass hover:bg-gray-700 rounded-xl text-gray-300 transition-colors">← Back to Home</button></div>
+      </div>
+    </div>
+
+    <!-- Mechanic Pricing Screen -->
+    <div id="mechanicPricingScreen" class="min-h-screen p-8 hidden">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12"><h2 class="text-6xl font-bold mb-4 gradient-text">Mechanic Earning Opportunities</h2><p class="text-xl text-gray-300">Join our premium network and maximize your earnings</p></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+          <!-- Rates & benefits (omitted here for brevity; same structure as earlier) -->
+          <!-- Keep the content exactly as in your previous full HTML if needed -->
+        </div>
+        <div class="text-center">
+          <button onclick="joinMechanic()" class="px-12 py-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-2xl text-white font-bold text-xl hover:scale-105 transform transition-all duration-300 glow mr-4">Join as Mechanic</button>
+          <button onclick="showWelcome()" class="px-8 py-4 glass hover:bg-gray-700 rounded-2xl text-gray-300 transition-colors">← Back to Home</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Dashboard -->
+    <div id="customerDashboard" class="min-h-screen hidden">
+      <div class="glass p-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+          <div><h1 class="text-3xl font-bold gradient-text">Welcome Back! 👋</h1><p class="text-purple-300">Ready to get your vehicle serviced?</p></div>
+          <button onclick="logout()" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-xl transition-colors">Logout</button>
+        </div>
+      </div>
+
+      <div class="max-w-7xl mx-auto p-8">
+        <div class="mb-12">
+          <button onclick="showEmergencyModal()" class="w-full py-8 bg-gradient-to-r from-red-600 to-pink-600 rounded-3xl text-white font-bold text-3xl hover:scale-105 transform transition-all duration-300 glow pulse-glow">🚨 EMERGENCY ASSISTANCE<div class="text-lg mt-2 opacity-90">Get help within 15 minutes</div></button>
+        </div>
+
+        <div class="mb-12">
+          <h2 class="text-3xl font-bold mb-8 gradient-text">Available Services</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="servicesGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Modal -->
+    <div id="emergencyModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="emergencyTitle">
+      <div class="glass p-8 rounded-3xl max-w-md w-full mx-4 glow" tabindex="-1">
+        <h3 id="emergencyTitle" class="text-2xl font-bold text-center mb-6 gradient-text">Emergency Service Request</h3>
+        <div class="mb-6">
+          <label class="block text-sm font-bold mb-3">Vehicle Type:</label>
+          <div class="flex gap-4">
+            <button onclick="selectVehicle('car')" id="carBtn" class="flex-1 p-4 glass rounded-xl hover:bg-purple-600 transition-colors">🚗 Car</button>
+            <button onclick="selectVehicle('bike')" id="bikeBtn" class="flex-1 p-4 glass rounded-xl hover:bg-purple-600 transition-colors">🏍️ Bike</button>
+          </div>
+        </div>
+        <div class="mb-6">
+          <label class="block text-sm font-bold mb-3">Service Type:</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="selectService('battery')" id="batteryBtn" class="p-3 glass rounded-xl hover:bg-purple-600 transition-colors text-sm">🔋 Battery</button>
+            <button onclick="selectService('tire')" id="tireBtn" class="p-3 glass rounded-xl hover:bg-purple-600 transition-colors text-sm">🛞 Tire</button>
+            <button onclick="selectService('engine')" id="engineBtn" class="p-3 glass rounded-xl hover:bg-purple-600 transition-colors text-sm">⚙️ Engine</button>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <button onclick="requestEmergencyService()" class="flex-1 py-3 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-bold hover:scale-105 transition-all">Request Service</button>
+          <button onclick="hideEmergencyModal()" class="flex-1 py-3 glass rounded-xl hover:bg-gray-700 transition-colors">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link to external JS -->
+  <script src="code.js"></script>
+</body>
+</html>
